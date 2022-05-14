@@ -5,7 +5,7 @@ from tango import AttrWriteType, DevState, GreenMode
 from tango.server import Device, attribute, command, device_property
 
 
-class PercivalMeta(Device):
+class WebsocketReceiver(Device):
     """TCP socket server to receive and store image information from PERCIVAL
     detector."""
 
@@ -76,5 +76,5 @@ class PercivalMeta(Device):
         await self.server.wait_closed()
 
 if __name__ == "__main__":
-    PercivalMeta.run_server()
+    WebsocketReceiver.run_server()
 
