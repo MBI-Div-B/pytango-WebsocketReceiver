@@ -3,6 +3,7 @@
 import asyncio
 from tango import AttrWriteType, DevState, GreenMode
 from tango.server import Device, attribute, command, device_property
+import time
 
 
 class WebsocketReceiver(Device):
@@ -33,10 +34,17 @@ class WebsocketReceiver(Device):
         access=AttrWriteType.READ,
         )
 
+    dtime = attribute(
+        label="time since last message",
+        dtype=float,
+        access=AttrWriteType.READ,
+        )
+
     async def init_device(self):
         await super().init_device()
         self._basename = ''
         self._nimages = 0
+        self._tlast = time.time()
         self.set_state(DevState.ON)
 
         self.server = await asyncio.start_server(
@@ -58,6 +66,7 @@ class WebsocketReceiver(Device):
                 num = int(line[1].strip())
                 self._basename = bn
                 self._nimages = num
+                self._tlast = time.time()
                 ans = "OK"
             except Exception as ex:
                 print(ex, file=self.log_error)
@@ -70,6 +79,9 @@ class WebsocketReceiver(Device):
 
     def read_nimages(self):
         return self._nimages
+
+    def read_dtime(self):
+        return time.time() - self._tlast
 
     async def delete_device(self):
         self.server.close()
